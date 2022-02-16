@@ -6,8 +6,8 @@ Full Speed modes.
 The firmware presents itself as a virtual COM-port (VCP), so no additional software
 is necessary and it is compatible with all operating systems.
 
-Here are a couple of example capture logs for [the enumeration](doc/usb_fs_enumeration.txt)
-and a regular [data transfer](usb_fs_data.txt).
+Here are a couple of example capture logs for the [enumeration](doc/usb_fs_enumeration.txt)
+and a regular [data transfer](doc/usb_fs_data.txt).
 
 The compiled binary is available [here](bin/UsbSnifferLite.uf2). Boot RP2040 into
 the BootROM mode and copy the UF2 file to the drive.
