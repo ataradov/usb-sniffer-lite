@@ -3,7 +3,7 @@ BUILD = build
 BIN = UsbSnifferLite
 
 ##############################################################################
-.PHONY: all directory clean size
+.PHONY: all directory clean size release
 
 CC = arm-none-eabi-gcc
 OBJCOPY = arm-none-eabi-objcopy
@@ -49,7 +49,7 @@ CFLAGS += $(INCLUDES) $(DEFINES)
 
 OBJS = $(addprefix $(BUILD)/, $(notdir %/$(subst .c,.o, $(SRCS))))
 
-all: directory $(BUILD)/$(BIN).elf $(BUILD)/$(BIN).hex $(BUILD)/$(BIN).bin $(BUILD)/$(BIN).uf2 size
+all: directory $(BUILD)/$(BIN).elf $(BUILD)/$(BIN).hex $(BUILD)/$(BIN).bin $(BUILD)/$(BIN).uf2 release size
 
 $(BUILD)/$(BIN).elf: $(OBJS)
 	@echo LD $@
@@ -70,6 +70,10 @@ $(BUILD)/$(BIN).uf2: $(BUILD)/$(BIN).bin
 %.o:
 	@echo CC $@
 	@$(CC) $(CFLAGS) $(filter %/$(subst .o,.c,$(notdir $@)), $(SRCS)) -c -o $@
+
+release: $(BUILD)/$(BIN).uf2
+	@echo release
+	@cp $(BUILD)/$(BIN).uf2 ../../bin/
 
 directory:
 	@$(MKDIR) -p $(BUILD)
