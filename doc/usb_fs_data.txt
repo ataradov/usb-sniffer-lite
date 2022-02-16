@@ -1,0 +1,62 @@
+   ... : Folded 3 frames
+  1000 : SOF #335
+     4 : IN: 0x40/1
+     7 : NAK
+     9 : OUT: 0x40/2
+    12 : DATA1: 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97 97
+    58 : ACK
+  1000 : SOF #336
+     4 : IN: 0x40/1
+     7 : DATA1: 97 98 99 9a 9b 9c 9d 9e 9f a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 ca cb cc cd ce cf d0 d1 d2 d3 d4 d5 d6
+    53 : ACK
+   ... : Folded 10 frames
+   999 : SOF #347
+     4 : IN: 0x40/1
+     7 : NAK
+     9 : OUT: 0x40/2
+    12 : DATA0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    58 : ACK
+  1000 : SOF #348
+     4 : IN: 0x40/1
+     7 : DATA0: 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f 20 21 22 23 24 25 26 27 28 29 2a 2b 2c 2d 2e 2f 30 31 32 33 34 35 36 37 38 39 3a 3b 3c 3d 3e 3f
+    53 : ACK
+   ... : Folded 10 frames
+  1000 : SOF #359
+     4 : IN: 0x40/1
+     7 : NAK
+     9 : OUT: 0x40/2
+    12 : DATA1: ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
+    65 : ACK
+  1000 : SOF #360
+     4 : IN: 0x40/1
+     7 : DATA1: ff 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f 20 21 22 23 24 25 26 27 28 29 2a 2b 2c 2d 2e 2f 30 31 32 33 34 35 36 37 38 39 3a 3b 3c 3d 3e
+    53 : ACK
+   ... : Folded 10 frames
+   999 : SOF #371
+     4 : IN: 0x40/1
+     7 : NAK
+     9 : OUT: 0x40/2
+    12 : DATA0: 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a 9a
+    58 : ACK
+  1000 : SOF #372
+     4 : IN: 0x40/1
+     7 : DATA0: 9a 9b 9c 9d 9e 9f a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 ca cb cc cd ce cf d0 d1 d2 d3 d4 d5 d6 d7 d8 d9
+    53 : ACK
+   ... : Folded 10 frames
+  1000 : SOF #383
+     4 : IN: 0x40/1
+     7 : NAK
+     9 : OUT: 0x40/2
+    12 : DATA1: 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b 9b
+    58 : ACK
+  1001 : SOF #384
+     3 : IN: 0x40/1
+     6 : DATA1: 9b 9c 9d 9e 9f a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 ca cb cc cd ce cf d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da
+    52 : ACK
+   ... : Folded 6 frames
+  1001 : SOF #391
+     3 : IN: 0x40/1
+     6 : NAK
+
+Total: 0 errors, 0 bus resets, 200 FS packets, 60 frames, 49 empty frames
+
