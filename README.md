@@ -30,8 +30,8 @@ took less than 10 minutes to make. Feel free to make it prettier.
 
 ![USB Cable](doc/cable.jpg)
 
-Here is a version based on the [custom breakout board](https://github.com/ataradov/breakout-boards/tree/master/rp2040):
-![1](doc/usb_sniffer_1.jpg) ![2](doc/usb_sniffer_2.jpg) ![3](doc/usb_sniffer_3.jpg) ![4](doc/usb_sniffer_4.jpg)
+[Here](doc/Hardware.md) are some pictures of a cleaner version based on
+the [custom breakout board](https://github.com/ataradov/breakout-boards/tree/master/rp2040).
 
 Trigger input is internally pulled up and the active level is low. When trigger is
 enabled in the settings, the capture would pause until the trigger pin is pulled low.
