@@ -43,7 +43,7 @@ const alignas(4) usb_configuration_hierarchy_t usb_configuration_hierarchy =
   {
     .bLength             = sizeof(usb_interface_association_descriptor_t),
     .bDescriptorType     = USB_INTERFACE_ASSOCIATION_DESCRIPTOR,
-    .bFirstInterface     = 1,
+    .bFirstInterface     = 0,
     .bInterfaceCount     = 2,
     .bFunctionClass      = USB_CDC_COMM_CLASS,
     .bFunctionSubClass   = USB_CDC_ACM_SUBCLASS,
