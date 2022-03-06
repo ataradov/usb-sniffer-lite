@@ -178,14 +178,13 @@ static void print_simple(char *text)
 //-----------------------------------------------------------------------------
 static void print_data(char *pid, uint8_t *data, int size)
 {
-  display_puts(pid);
-  display_puts(": ");
-
   size -= 4;
+
+  display_puts(pid);
 
   if (size == 0)
   {
-    display_puts("ZLP\r\n");
+    display_puts(": ZLP\r\n");
   }
   else
   {
@@ -197,6 +196,10 @@ static void print_data(char *pid, uint8_t *data, int size)
       limited = LIMIT(size, 16);
     else if (g_display_data == DisplayData_Limit64)
       limited = LIMIT(size, 64);
+
+    display_puts(" (");
+    display_putdec(size, 0);
+    display_puts("): ");
 
     for (int j = 0; j < limited; j++)
     {
