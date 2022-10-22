@@ -12,6 +12,10 @@ and a regular [data transfer](doc/usb_fs_data.txt).
 The compiled binary is available [here](bin/UsbSnifferLite.uf2). Boot RP2040 into
 the BootROM mode and copy the UF2 file to the drive.
 
+This sniffer has no packet decoding capabilities, but there is an excellent online
+[USB Descriptor and Request Parser](https://eleccelerator.com/usbdescreqparser/)
+that is very helpful with decoding of the standard descriptors and requests.
+
 ## Hardware Connections
 
 USB D+ and D- signals can be directly connected to the MCU pins. The default
