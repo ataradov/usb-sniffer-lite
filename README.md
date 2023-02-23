@@ -16,6 +16,9 @@ This sniffer has no packet decoding capabilities, but there is an excellent onli
 [USB Descriptor and Request Parser](https://eleccelerator.com/usbdescreqparser/)
 that is very helpful with decoding of the standard descriptors and requests.
 
+The compiled binary needs to have CRC value updated to be recognized by the RP2040.
+This can be done using [this](https://github.com/ataradov/tools/tree/master/bin2uf2) tool.
+
 ## Hardware Connections
 
 USB D+ and D- signals can be directly connected to the MCU pins. The default
