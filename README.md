@@ -48,6 +48,20 @@ enabled in the settings, the capture would pause until the trigger pin is pulled
 Given the limited size of the capture buffer, trigger mechanism provides a way for
 the debugged target to mark the part of interest.
 
+## Dedicated Hardware
+
+There is now a dedicated board. It integrates FE8.1 USB HUB, so you only need one
+connection to the host PC. This simplifies setup a lot and eliminates wiring mess
+that usually happens when working with USB sniffers.
+
+Normally it is not advised to use the same host port for the sniffer and the target device,
+but since in this case only USB Low Speed and Full Speed modes are supported, there
+is plenty of bandwidth for both devices.
+
+Schematics and Gerber files are available in the [hardware](hardware/) directory.
+
+![USB Sniffer Lite PCB](doc/usb-sniffer-lite.jpg)
+
 ## Settings
 
 The following settings are supported:
