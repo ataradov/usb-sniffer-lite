@@ -25,11 +25,14 @@ USB D+ and D- signals can be directly connected to the MCU pins. The default
 pin assignments are shown in the following table:
 
 | RP2040 Pin | Function | USB Cable Color |
-|:-------:|:-------:|:-----:|
-| GND     | Ground  | Black |
-| GPIO 10 | D+      | Green |
-| GPIO 11 | D-      | White |
-| GPIO 18 | Trigger | N/A   |
+|:-------:|:----------------:|:-----:|
+| GND     | Ground           | Black |
+| GPIO 10 | D+               | Green |
+| GPIO 11 | D-               | White |
+| GPIO 12 | Start (internal) | N/A   |
+| GPIO 18 | Trigger          | N/A   |
+| GPIO 25 | Status LED       | N/A   |
+| GPIO 26 | Error LED        | N/A   |
 
 The easiest way to connect the signals to the Raspberry Pi Pico board is to splice
 the USB cable. It does not have to be pretty. Below is a picture of a cable that

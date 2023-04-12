@@ -98,5 +98,6 @@ extern int g_display_data;
 extern int g_display_fold;
 
 /*- Prototypes --------------------------------------------------------------*/
+void set_error(bool error);
 
 #endif // _GLOBALS_H_

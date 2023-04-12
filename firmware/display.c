@@ -13,9 +13,13 @@
 #include "utils.h"
 
 /*- Definitions -------------------------------------------------------------*/
+#define ERROR_DATA_SIZE_LIMIT  16
+#define MAX_PACKET_DELTA       10000 // us
 
 /*- Variables ---------------------------------------------------------------*/
 static uint32_t g_ref_time;
+static uint32_t g_prev_time;
+static bool g_check_delta;
 static bool g_folding;
 static int g_fold_count;
 static int g_display_ptr;
@@ -100,13 +104,24 @@ static void print_errors(uint32_t flags, uint8_t *data, int size)
 
   if (size > 2)
   {
+    bool limited = false;
+
     display_puts("DATA: ");
+
+    if (size > ERROR_DATA_SIZE_LIMIT)
+    {
+      size = ERROR_DATA_SIZE_LIMIT;
+      limited = true;
+    }
 
     for (int i = 2; i < size; i++)
     {
       display_puthex(data[i], 2);
       display_putc(' ');
     }
+
+    if (limited)
+      display_puts("...");
   }
 
   display_puts("\r\n");
@@ -252,16 +267,26 @@ static void print_time(int time)
 }
 
 //-----------------------------------------------------------------------------
-static void print_packet(void)
+static bool print_packet(void)
 {
   int flags = g_buffer[g_display_ptr];
   int time  = g_buffer[g_display_ptr+1];
   int ftime = time - g_ref_time;
+  int delta = time - g_prev_time;
   int size  = flags & CAPTURE_SIZE_MASK;
   uint8_t *payload = (uint8_t *)&g_buffer[g_display_ptr+2];
   int pid = payload[1] & 0x0f;
 
+  if (g_check_delta && delta > MAX_PACKET_DELTA)
+  {
+    display_puts("Time delta between packets is too large, possible buffer corruption.\r\n");
+    return false;
+  }
+
   g_display_ptr += (((size+3)/4) + 2);
+
+  g_prev_time = time;
+  g_check_delta = true;
 
   if (flags & CAPTURE_LS_SOF)
     pid = Pid_Sof;
@@ -272,12 +297,12 @@ static void print_packet(void)
   if (g_folding)
   {
     if (pid != Pid_Sof)
-      return;
+      return true;
 
     if (flags & CAPTURE_MAY_FOLD)
     {
       g_fold_count++;
-      return;
+      return true;
     }
 
     print_g_fold_count(g_fold_count);
@@ -288,7 +313,7 @@ static void print_packet(void)
   {
     g_folding = true;
     g_fold_count = 1;
-    return;
+    return true;
   }
 
   print_time(ftime);
@@ -300,19 +325,21 @@ static void print_packet(void)
     if (g_display_time == DisplayTime_Reset)
       g_ref_time = time;
 
-    return;
+    g_check_delta = false;
+
+    return true;
   }
 
   if (flags & CAPTURE_LS_SOF)
   {
     print_ls_sof();
-    return;
+    return true;
   }
 
   if (flags & CAPTURE_ERROR_MASK)
   {
     print_errors(flags, payload, size);
-    return;
+    return true;
   }
 
   if (pid == Pid_Sof)
@@ -350,6 +377,8 @@ static void print_packet(void)
     print_split(payload);
   else if (pid == Pid_Reserved)
     print_simple("RESERVED");
+
+  return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -375,12 +404,17 @@ void display_buffer(void)
   display_puts("\r\nCapture buffer:\r\n");
 
   g_ref_time    = g_buffer[1];
+  g_prev_time   = g_buffer[1];
   g_folding     = false;
+  g_check_delta = true;
   g_fold_count  = 0;
   g_display_ptr = 0;
 
   for (int i = 0; i < g_buffer_info.count; i++)
-    print_packet();
+  {
+    if (!print_packet())
+      break;
+  }
 
   if (g_folding && g_fold_count)
     print_g_fold_count(g_fold_count);

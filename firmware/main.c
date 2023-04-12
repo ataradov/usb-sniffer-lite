@@ -24,7 +24,8 @@
 #define VCP_TIMEOUT        10000 // us
 #define STATUS_TIMEOUT     500000 // us
 
-HAL_GPIO_PIN(LED,  0, 25, sio_25)
+HAL_GPIO_PIN(LED_O, 0, 25, sio_25)
+HAL_GPIO_PIN(LED_R, 0, 26, sio_26)
 
 /*- Variables ---------------------------------------------------------------*/
 static uint8_t app_recv_buffer[USB_BUFFER_SIZE];
@@ -130,7 +131,7 @@ static void status_timer_task(void)
   {
     TIMER->INTR = TIMER_INTR_ALARM_0_Msk;
     TIMER->ALARM0 = TIMER->TIMELR + STATUS_TIMEOUT;
-    HAL_GPIO_LED_toggle();
+    HAL_GPIO_LED_O_toggle();
   }
 }
 
@@ -268,6 +269,12 @@ void usb_configuration_callback(int config)
 }
 
 //-----------------------------------------------------------------------------
+void set_error(bool error)
+{
+  HAL_GPIO_LED_R_write(error);
+}
+
+//-----------------------------------------------------------------------------
 int main(void)
 {
   sys_init();
@@ -277,8 +284,11 @@ int main(void)
   serial_number_init();
   capture_init();
 
-  HAL_GPIO_LED_out();
-  HAL_GPIO_LED_clr();
+  HAL_GPIO_LED_O_out();
+  HAL_GPIO_LED_O_clr();
+
+  HAL_GPIO_LED_R_out();
+  HAL_GPIO_LED_R_clr();
 
   while (1)
   {

@@ -19,9 +19,11 @@
 // DP and DM can be any pins, but they must be consequitive and in that order
 #define DP_INDEX       10
 #define DM_INDEX       11
+#define START_INDEX    12
 
 HAL_GPIO_PIN(DP,       0, 10, pio0_10)
 HAL_GPIO_PIN(DM,       0, 11, pio0_11)
+HAL_GPIO_PIN(START,    0, 12, pio1_12) // Internal trigger from PIO1 to PIO0
 HAL_GPIO_PIN(TRIGGER,  0, 18, sio_18)
 
 /*- Constants ---------------------------------------------------------------*/
@@ -171,7 +173,10 @@ static uint8_t crc5_usb(uint8_t *data, int size)
 static void handle_folding(int pid, uint32_t error)
 {
   if (error)
+  {
     g_buffer_info.errors++;
+    set_error(true);
+  }
 
   if (pid == Pid_Sof)
   {
@@ -424,21 +429,23 @@ static bool wait_for_trigger(void)
 //-----------------------------------------------------------------------------
 static void capture_buffer(void)
 {
-  volatile uint32_t *instr = (volatile uint32_t *)&PIO0->INSTR_MEM0;
+  volatile uint32_t *PIO0_INSTR_MEM = (volatile uint32_t *)&PIO0->INSTR_MEM0;
+  volatile uint32_t *PIO1_INSTR_MEM = (volatile uint32_t *)&PIO1->INSTR_MEM0;
   int index, packet;
 
   HAL_GPIO_DP_init();
   HAL_GPIO_DM_init();
+  HAL_GPIO_START_init();
 
-  RESETS_SET->RESET = RESETS_RESET_pio0_Msk;
-  RESETS_CLR->RESET = RESETS_RESET_pio0_Msk;
-  while (0 == RESETS->RESET_DONE_b.pio0);
+  RESETS_SET->RESET = RESETS_RESET_pio0_Msk | RESETS_RESET_pio1_Msk;
+  RESETS_CLR->RESET = RESETS_RESET_pio0_Msk | RESETS_RESET_pio1_Msk;
+  while (0 == RESETS->RESET_DONE_b.pio0 && 0 == RESETS->RESET_DONE_b.pio1);
 
   g_buffer_info.fs = (g_capture_speed == CaptureSpeed_Full);
   g_buffer_info.trigger = (g_capture_trigger == CaptureTrigger_Enabled);
   g_buffer_info.limit = capture_limit_value();
 
-  static const uint16_t ops[] =
+  static const uint16_t pio0_ops[] =
   {
     // idle:
     /* 0 */  OP_MOV | MOV_DST_X | MOV_SRC_NULL | MOV_OP_INVERT,   // Reset the bit counter
@@ -484,31 +491,81 @@ static void capture_buffer(void)
     /* 28 */ OP_JMP | JMP_COND_X_NZ_PD | JMP_ADDR(25/*poll_loop*/),
     /* 29 */ OP_MOV | MOV_DST_ISR | MOV_SRC_NULL | MOV_OP_INVERT,
     /* 30 */ OP_PUSH,
-    /* 31 */ OP_JMP | JMP_ADDR(0/*idle*/),
+    // Wrap to 0 from here
+
+    // Entry point, wait for a START signal from the PIO1
+    /* 31 */ OP_WAIT | WAIT_POL_1 | WAIT_SRC_PIN | WAIT_INDEX(2),
   };
 
+  static const uint16_t pio1_ops[] =
+  {
+    /* 0 */  OP_NOP | OP_DELAY(31), // Wait for the PIO0 to start
+    /* 1 */  OP_NOP | OP_DELAY(31),
+    /* 2 */  OP_NOP | OP_DELAY(31),
+    /* 3 */  OP_NOP | OP_DELAY(31),
+
+    // wait_se0:
+    /* 4 */  OP_MOV | MOV_DST_OSR | MOV_SRC_PINS | MOV_OP_BIT_REV,
+    /* 5 */  OP_OUT | OUT_DST_Y | OUT_CNT(2),
+    /* 6 */  OP_JMP | JMP_COND_Y_NZ_PD | JMP_ADDR(4/*wait_se0*/),
+
+    /* 7 */  OP_MOV | MOV_DST_OSR | MOV_SRC_PINS | MOV_OP_BIT_REV,
+    /* 8 */  OP_OUT | OUT_DST_Y | OUT_CNT(2),
+    /* 9 */  OP_JMP | JMP_COND_Y_NZ_PD | JMP_ADDR(4/*wait_se0*/),
+
+    /* 10 */ OP_MOV | MOV_DST_OSR | MOV_SRC_PINS | MOV_OP_BIT_REV,
+    /* 11 */ OP_OUT | OUT_DST_Y | OUT_CNT(2),
+    /* 12 */ OP_JMP | JMP_COND_Y_NZ_PD | JMP_ADDR(4/*wait_se0*/),
+
+    /* 13 */ OP_MOV | MOV_DST_OSR | MOV_SRC_PINS | MOV_OP_BIT_REV,
+    /* 14 */ OP_OUT | OUT_DST_Y | OUT_CNT(2),
+    /* 15 */ OP_JMP | JMP_COND_Y_NZ_PD | JMP_ADDR(4/*wait_se0*/),
+
+    /* 16 */ OP_SET | SET_DST_PINS | SET_DATA(1), // Set the START output
+    /* 17 */ OP_JMP | JMP_ADDR(17/*self*/), // Infinite loop
+  };
+
+  // PIO0 init
   PIO0->SM0_CLKDIV = ((g_buffer_info.fs ? 1 : 8) << PIO0_SM0_CLKDIV_INT_Pos);
 
-  for (int i = 0; i < (int)(sizeof(ops)/sizeof(uint16_t)); i++)
-    instr[i] = ops[i];
+  for (int i = 0; i < (int)(sizeof(pio0_ops)/sizeof(uint16_t)); i++)
+    PIO0_INSTR_MEM[i] = pio0_ops[i];
 
   if (!g_buffer_info.fs)
   {
-    instr[1] = OP_WAIT | WAIT_POL_1 | WAIT_SRC_PIN | WAIT_INDEX(1);
-    instr[2] = OP_WAIT | WAIT_POL_0 | WAIT_SRC_PIN | WAIT_INDEX(1);
+    PIO0_INSTR_MEM[1] = OP_WAIT | WAIT_POL_1 | WAIT_SRC_PIN | WAIT_INDEX(1);
+    PIO0_INSTR_MEM[2] = OP_WAIT | WAIT_POL_0 | WAIT_SRC_PIN | WAIT_INDEX(1);
   }
 
-  PIO0->SM0_EXECCTRL = ((g_buffer_info.fs ? DM_INDEX : DP_INDEX) << PIO0_SM0_EXECCTRL_JMP_PIN_Pos) | (31 << PIO0_SM0_EXECCTRL_WRAP_TOP_Pos) |
-      (0 << PIO0_SM0_EXECCTRL_WRAP_BOTTOM_Pos);
+  PIO0->SM0_EXECCTRL = ((g_buffer_info.fs ? DM_INDEX : DP_INDEX) << PIO0_SM0_EXECCTRL_JMP_PIN_Pos) |
+      (30 << PIO0_SM0_EXECCTRL_WRAP_TOP_Pos) | (0 << PIO0_SM0_EXECCTRL_WRAP_BOTTOM_Pos);
 
   PIO0->SM0_SHIFTCTRL = PIO0_SM0_SHIFTCTRL_FJOIN_RX_Msk | PIO0_SM0_SHIFTCTRL_AUTOPUSH_Msk |
       (31 << PIO0_SM0_SHIFTCTRL_PUSH_THRESH_Pos);
 
   PIO0->SM0_PINCTRL = (DP_INDEX << PIO0_SM0_PINCTRL_IN_BASE_Pos);
 
+  PIO0->SM0_INSTR = OP_JMP | JMP_ADDR(31);
+
+  // PIO1 init
+  PIO1->SM0_CLKDIV = ((g_buffer_info.fs ? 1 : 8) << PIO0_SM0_CLKDIV_INT_Pos);
+
+  for (int i = 0; i < (int)(sizeof(pio1_ops)/sizeof(uint16_t)); i++)
+    PIO1_INSTR_MEM[i] = pio1_ops[i];
+
+  PIO1->SM0_EXECCTRL  = (31 << PIO0_SM0_EXECCTRL_WRAP_TOP_Pos) | (0 << PIO0_SM0_EXECCTRL_WRAP_BOTTOM_Pos);
+  PIO1->SM0_SHIFTCTRL = 0;
+  PIO1->SM0_PINCTRL   = (DP_INDEX << PIO0_SM0_PINCTRL_IN_BASE_Pos) |
+      (START_INDEX << PIO0_SM0_PINCTRL_SET_BASE_Pos) | (1 << PIO0_SM0_PINCTRL_SET_COUNT_Pos);
+
+  PIO1->SM0_INSTR = OP_SET | SET_DST_PINDIRS | SET_DATA(1); // Clear the START output
+  PIO1->SM0_INSTR = OP_SET | SET_DST_PINS    | SET_DATA(0);
+
   index = 2;
   packet = 0;
   g_buffer_info.count = 0;
+
+  set_error(false);
 
   if (!wait_for_trigger())
   {
@@ -518,6 +575,7 @@ static void capture_buffer(void)
 
   display_puts("Capture started\r\n");
 
+  PIO1_SET->CTRL = (1 << (PIO0_CTRL_SM_ENABLE_Pos + 0));
   PIO0_SET->CTRL = (1 << (PIO0_CTRL_SM_ENABLE_Pos + 0));
 
   while (1)
