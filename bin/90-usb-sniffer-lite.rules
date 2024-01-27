@@ -1,0 +1,11 @@
+# CDC-ACM interface for USB Sniffer Lite
+# Create symlinks for CDC-ACM
+# Put device into group plugdev
+# Ensure the ModemManager does not touch our device
+
+ATTRS{idVendor}=="6666", ATTRS{idProduct}=="6610", SUBSYSTEM=="tty", \
+	SYMLINK+="usbsniffer", MODE="660", GROUP="plugdev"
+
+ATTRS{idVendor}=="6666", ATTRS{idProduct}=="6610", SUBSYSTEM=="tty", \
+	ENV{ID_MM_PORT_IGNORE}="1", ENV{ID_MM_DEVICE_IGNORE}="1", ENV{ID_MM_CANDIDATE}="0"
+
