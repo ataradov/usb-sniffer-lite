@@ -17,7 +17,7 @@ This sniffer has no packet decoding capabilities, but there is an excellent onli
 that is very helpful with decoding of the standard descriptors and requests.
 
 The compiled binary needs to have CRC value updated to be recognized by the RP2040.
-This can be done using [this](https://github.com/ataradov/tools/tree/master/bin2uf2) tool.
+This can be done using [bin2uf2](https://github.com/ataradov/tools/tree/master/bin2uf2) tool.
 
 ## Hardware Connections
 
